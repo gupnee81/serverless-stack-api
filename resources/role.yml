@@ -1,5 +1,5 @@
 Resources:
-  invokeLambdaRoleTest:
+  NotesAppRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -11,3 +11,28 @@ Resources:
                 - lambda.amazonaws.com
             Action: sts:AssumeRole
       PermissionsBoundary: arn:aws:iam::244998048076:policy/saml/SecurityIamBuilderPermissionsBoundary
+      Policies:
+        - PolicyName: notes-app-role
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:*
+                Resource:
+                  - arn:aws:dynamodb:*:*:table/${self:provider.environment.tableName}
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - arn:aws:lambda:*:*:function:*
+              - Effect: 'Allow'
+                Action:
+                  - 's3:*'
+                Resource:
+                  - Fn::Join:
+                    - ''
+                    -
+                      - Fn::GetAtt: [NotesAppAttachmentsBucket, Arn]
+                      - '/private/'
+                      - '$'
+                      - '{cognito-identity.amazonaws.com:sub}/*'
