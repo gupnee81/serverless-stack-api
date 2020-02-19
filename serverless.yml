@@ -25,7 +25,6 @@ provider:
     tableName: notes-app-api
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
     stripeSecretKey: ${env:STRIPE_SECRET_KEY}
-  #  sampleEnvVar: ${env:SAMPLE_ENV_VAR}
 
 functions:
   create:
@@ -75,28 +74,16 @@ functions:
           authorizer: aws_iam
   billing:
     handler: billing.main
+    role: invokeLambdaRoleTest
     events:
       - http:
           path: billing
           method: post
           cors: true
           authorizer: aws_iam
-                  
 resources:
-  Resources:
-    - ${file(resources/api-gateway-errors.yml)}
-    - invokeLambdaRoleTest:
-        Type: AWS::IAM::Role
-        Properties:
-          AssumeRolePolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Principal:
-                  Service:
-                    - lambda.amazonaws.com
-                Action: sts:AssumeRole
-          PermissionsBoundary: arn:aws:iam::244998048076:policy/saml/SecurityIamBuilderPermissionsBoundary
+  - ${file(resources/api-gateway-errors.yml)}
+  - ${file(resources/role.yml)}
     # NotesDynamoDbTable:
     #   Type: 'AWS::DynamoDB::Table'
     #   Properties:
